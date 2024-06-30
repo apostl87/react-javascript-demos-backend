@@ -92,3 +92,5 @@ app.patch('/merchant-products/:merchant_userid/:product_id', (req, res) => {
 app.listen(port, () => {
 	console.log(`API running on port ${port}.`)
 })
+
+module.exports = app;
