@@ -1,0 +1,22 @@
+{
+  "name": "postgres",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "",
+  "license": "ISC",
+  "description": "React App with a PostgreSQL DB",
+  "scripts": {
+    "start": "node api/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@vercel/node": "^3.2.0",
+    "@vercel/postgres": "^0.9.0",
+    "cors": "^2.8.5",
+    "crypto": "^1.0.1",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.12.0",
+    "react-tooltip": "^5.26.4"
+  }
+}
