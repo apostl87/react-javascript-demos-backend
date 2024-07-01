@@ -1,6 +1,4 @@
 const template = `
-DELETE FROM merchant_products WHERE merchant_userid = '{merchant_userid}';
-
 INSERT INTO merchant_products(product_name, productioncountry, color, usagefrequency, sizelength, sizewidth, sizeheight, image_url, price_currency, price, weight_kg, country_id_production, merchant_userid) VALUES
 ('Canned Goods', 'SEN', '#795bad', '', -151017344.74, 994359738.59, -55837545.34, 'https://picsum.photos/seed/553/200/300', 'EUR', 94.86, 49.6, 50, '{merchant_userid}'),
 ('Taxicab', 'NZL', '#ff9400', '', -923107760.57, -567566833.41, 351709481.71, 'https://picsum.photos/seed/674/200/300', 'EUR', 117.20, 1.1, 13, '{merchant_userid}'),

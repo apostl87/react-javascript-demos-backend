@@ -15,6 +15,7 @@ const getMerchantProducts = (merchant_userid) => {
     })
 }
 
+// todo: debugging
 const updateMerchantProduct = (merchant_userid, product_id, body) => {
     return new Promise(function (resolve, reject) {
         const { product_name, color, weight, price, country_id, image_url } = body;
@@ -39,18 +40,31 @@ const updateMerchantProduct = (merchant_userid, product_id, body) => {
     });
 };
 
-// todo
+// todo: implementation
 const createMerchantProduct = (body) => {
-    return new Promise(function (resolve, reject) {
-        const { product, productioncountry, color, weight_kg, price } = body
-        pool.query('INSERT INTO merchant_products (product, productioncountry, color, weight_kg, price) VALUES ($1, $2, $3, $4, $5) RETURNING *;', [product, productioncountry, color, weight_kg, price], (error, results) => {
-            if (error) {
-                reject(error)
-            }
-            resolve(`A new product has been added added: ${results.rows[0]}`)
-        })
-    })
+    // return new Promise(function (resolve, reject) {
+    //     const { product, productioncountry, color, weight_kg, price } = body
+    //     pool.query('INSERT INTO merchant_products (product, productioncountry, color, weight_kg, price) VALUES ($1, $2, $3, $4, $5) RETURNING *;', [product, productioncountry, color, weight_kg, price], (error, results) => {
+    //         if (error) {
+    //             reject(error)
+    //         }
+    //         resolve(`A new product has been added added: ${results.rows[0]}`)
+    //     })
+    // })
 }
+
+// Perhaps for a later version of the app
+// const createProductFull = (body) => {
+//     return new Promise(function (resolve, reject) {
+//       const { product, productioncountry, color, usagefrequency, weight_kg, sizelength, sizewidth, sizeheight, price, image_url } = body
+//       pool.query('INSERT INTO merchant_products (product, productioncountry, color, usagefrequency, weight_kg, sizelength, sizewidth, sizeheight, price, image_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *', [product, productioncountry, color, usagefrequency, weight_kg, sizelength, sizewidth, sizeheight, price, image_url], (error, results) => {
+//         if (error) {
+//           reject(error)
+//         }
+//         resolve(`A new product has been added added: ${results.rows[0]}`)
+//       })
+//     })
+//   }
 
 const deleteMerchantProduct = (merchant_userid, productId) => {
     let psql = `DELETE FROM merchant_products WHERE id = ${parseInt(productId)} and merchant_userid = '${merchant_userid}';`;
@@ -94,20 +108,6 @@ const initWithTestData = (merchant_userid) => {
         })
     })
 }
-
-// // For later development
-// const createProductFull = (body) => {
-//     return new Promise(function (resolve, reject) {
-//       const { product, productioncountry, color, usagefrequency, weight_kg, sizelength, sizewidth, sizeheight, price, image_url } = body
-//       pool.query('INSERT INTO merchant_products (product, productioncountry, color, usagefrequency, weight_kg, sizelength, sizewidth, sizeheight, price, image_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *', [product, productioncountry, color, usagefrequency, weight_kg, sizelength, sizewidth, sizeheight, price, image_url], (error, results) => {
-//         if (error) {
-//           reject(error)
-//         }
-//         resolve(`A new product has been added added: ${results.rows[0]}`)
-//       })
-//     })
-//   }
-
 
 module.exports = {
     getMerchantProducts,
