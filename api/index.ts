@@ -13,6 +13,7 @@ app.use(express.json());
 app.use(cors());
 
 app.use(function (req, res, next) {
+	res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
 	res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
 	res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Access-Control-Allow-Headers');
 	next();
@@ -89,6 +90,26 @@ app.patch('/merchant-products/:merchant_userid/:product_id', (req, res) => {
 		})
 })
 
+app.post('/merchant-products/create', (req, res) => {
+	MerchantProductModel.createMerchantProduct(req.body)
+		.then(response => {
+			res.status(200).send(response);
+		})
+		.catch(error => {
+			res.status(500).send(error);
+		})
+})
+
+app.post('/merchant-products/:merchant_userid/init', (req, res) => {
+	MerchantProductModel.initWithTestData(req.params.merchant_userid)
+		.then(response => {
+			res.status(200).send(response);
+		})
+		.catch(error => {
+			res.status(500).send(error);
+		})
+})
+
 app.delete('/merchant-products/:merchant_userid/:product_id', (req, res) => {
 	MerchantProductModel.deleteMerchantProduct(req.params.merchant_userid, req.params.product_id)
 		.then(response => {
@@ -101,16 +122,6 @@ app.delete('/merchant-products/:merchant_userid/:product_id', (req, res) => {
 
 app.delete('/merchant-products/:merchant_userid', (req, res) => {
 	MerchantProductModel.deleteAllMerchantProducts(req.params.merchant_userid)
-		.then(response => {
-			res.status(200).send(response);
-		})
-		.catch(error => {
-			res.status(500).send(error);
-		})
-})
-
-app.post('/merchant-products/:merchant_userid/init', (req, res) => {
-	MerchantProductModel.initWithTestData(req.params.merchant_userid)
 		.then(response => {
 			res.status(200).send(response);
 		})
