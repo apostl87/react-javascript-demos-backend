@@ -1,19 +1,32 @@
 const express = require('express');
+const { auth } = require('express-oauth2-jwt-bearer');
 const cors = require('cors');
+require('dotenv');
+
 const ProductModel = require('./express/Models/ProductModel.js');
 const CountryModel = require('./express/Models/CountryModel.js');
 const MerchantProductModel = require('./express/Models/MerchantProductModel.js');
 
 const app = express();
-const port = 3001;
+const port = process.env.PORT || 3001;
 
+const jwtCheck = auth({
+  audience: 'https://vercel-express-postgres.vercel.app/',
+  issuerBaseURL: 'https://dev-do7e3my01rhnrak7.eu.auth0.com/',
+  tokenSigningAlg: 'RS256'
+});
+
+// enforce authorization on all endpoints
+// app.use(jwtCheck);
+
+// enforce using json-formatted data packages
 app.use(express.json());
 
 // Enable CORS for cross-origin requests
-app.use(cors());
+app.use(cors({ origin: ["https://react-demos-one.vercel.app", "http://localhost:*"] }));
+
 
 app.use(function (req, res, next) {
-	res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
 	res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
 	res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Access-Control-Allow-Headers');
 	next();
