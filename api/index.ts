@@ -9,7 +9,10 @@ const MerchantProductModel = require('./Models/MerchantProductModel.js');
 
 const app = express();
 const port = process.env.PORT || 3001;
-const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS.split(" ")
+let ALLOWED_ORIGINS: string[] = [];
+if (process.env.ALLOWED_ORIGINS) {
+	ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS.split(" ")
+}
 const audience = process.env.AUTH0_API_AUDIENCE;
 const issuerBaseURL = process.env.AUTH0_BASE_URL;
 const jwtCheck = auth({
