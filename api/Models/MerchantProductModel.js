@@ -4,8 +4,7 @@ const pool = dbinfo.pool;
 
 const getMerchantProducts = (mp_merchant_user_id) => {
     return new Promise(function (resolve, reject) {
-        let psql = `SELECT * FROM merchant_products mp LEFT JOIN countries c ON mp.mp_c_id = c.c_id WHERE merchant_user_id = '${mp_merchant_user_id}' ORDER BY mp.mp_id ASC`;
-
+        let psql = psql_select_all(mp_merchant_user_id);
         pool.query(psql, (error, results) => {
             if (error) {
                 reject(error)
@@ -25,9 +24,11 @@ const updateMerchantProduct = (mp_merchant_user_id, mp_id, body) => {
 
         let psql = `UPDATE merchant_products
                 SET mp_name = '${mp_name}', mp_color = '${mp_color}',
-                    mp_weight_kg = '${mp_weight_kg}', mp_price = '${mp_price}', mp_c_id_production = '${mp_c_id_production}', mp_image_url = '${mp_image_url}'
+                    mp_weight_kg = '${mp_weight_kg}', mp_price = '${mp_price}', mp_c_id_production = ${mp_c_id_production}, mp_image_url = '${mp_image_url}'
                 WHERE mp_merchant_user_id = '${mp_merchant_user_id}' AND mp_id = '${mp_id}'
                 RETURNING *`;
+
+        console.log(psql);
 
         pool.query(
             psql,
@@ -46,13 +47,12 @@ const updateMerchantProduct = (mp_merchant_user_id, mp_id, body) => {
     });
 };
 
-
 const createMerchantProduct = (body) => {
     return new Promise(function (resolve, reject) {
         const { mp_name, mp_c_id_production, mp_color, mp_weight_kg, mp_price, mp_currency, mp_image_url, mp_merchant_user_id } = body
         let psql = `INSERT INTO merchant_products (mp_name, mp_c_id_production, mp_color, mp_weight_kg, mp_price, mp_currency, mp_image_url, mp_merchant_user_id)
-                VALUES ('${mp_name}', '${mp_c_id_production}', '${mp_color}', '${mp_weight_kg}', '${mp_price}', '${mp_currency}', '${mp_image_url}', '${mp_merchant_user_id}') RETURNING *;`;
-        
+                VALUES ('${mp_name}', ${mp_c_id_production}, '${mp_color}', '${mp_weight_kg}', '${mp_price}', '${mp_currency}', '${mp_image_url}', '${mp_merchant_user_id}') RETURNING *;`;
+
         console.log(psql)
 
         pool.query(
@@ -75,6 +75,8 @@ const createMerchantProduct = (body) => {
 const initWithTestData = (mp_merchant_user_id) => {
     let psql = require('../data_templates/init_merchant_products.js');
     psql = psql.replace(/{mp_merchant_user_id}/g, mp_merchant_user_id);
+    psql += psql_select_all(mp_merchant_user_id)
+    console.log(psql);
 
     return new Promise(function (resolve, reject) {
         pool.query(psql, (error, results) => {
@@ -83,14 +85,18 @@ const initWithTestData = (mp_merchant_user_id) => {
                 reject(error)
             }
             // console.log(results[results.length - 1])
-            resolve(results[results.length - 1].rows)
+            try {
+                resolve(results[results.length - 1].rows)
+            } catch (e) {
+                console.log(e)
+                resolve(`No products fetched.`)
+            }
         })
     })
 }
 
 const deleteMerchantProduct = (mp_merchant_user_id, mp_id) => {
     let psql = `DELETE FROM merchant_products WHERE mp_id = ${parseInt(mp_id)} and mp_merchant_user_id = '${mp_merchant_user_id}';`;
-    console.log(psql)
     return new Promise(function (resolve, reject) {
         pool.query(psql, (error, results) => {
             if (error) {
@@ -122,4 +128,9 @@ module.exports = {
     deleteMerchantProduct,
     deleteAllMerchantProducts,
     initWithTestData,
+}
+
+// Helper functions
+const psql_select_all = (mp_merchant_user_id) => {
+    return `SELECT * FROM merchant_products mp LEFT JOIN countries c ON mp.mp_c_id_production = c.c_id WHERE mp.mp_merchant_user_id = '${mp_merchant_user_id}' ORDER BY mp.mp_id ASC`;
 }

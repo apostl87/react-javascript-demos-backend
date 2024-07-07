@@ -105,7 +105,6 @@ app.get('/merchant-products/:merchant_userid', jwtCheck, (req, res) => {
 })
 
 app.patch('/merchant-products/:merchant_userid/:product_id', jwtCheck, (req, res) => {
-	console.log("Call received")
 	MerchantProductModel.updateMerchantProduct(req.params.merchant_userid, req.params.product_id, req.body)
 		.then(response => {
 			res.status(200).send(response);
