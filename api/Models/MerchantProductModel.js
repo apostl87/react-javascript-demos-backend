@@ -2,9 +2,9 @@ const dbinfo = require('../dbinfo.js');
 
 const pool = dbinfo.pool;
 
-const getMerchantProducts = (merchant_userid) => {
+const getMerchantProducts = (mp_merchant_user_id) => {
     return new Promise(function (resolve, reject) {
-        let psql = `SELECT * FROM merchant_products LEFT JOIN countries ON merchant_products.country_id_production = countries.country_id WHERE merchant_userid = '${merchant_userid}' ORDER BY merchant_products.id ASC`;
+        let psql = `SELECT * FROM merchant_products mp LEFT JOIN countries c ON mp.mp_c_id = c.c_id WHERE merchant_user_id = '${mp_merchant_user_id}' ORDER BY mp.mp_id ASC`;
 
         pool.query(psql, (error, results) => {
             if (error) {
@@ -19,15 +19,14 @@ const getMerchantProducts = (merchant_userid) => {
     })
 }
 
-// todo: debugging
-const updateMerchantProduct = (merchant_userid, product_id, body) => {
+const updateMerchantProduct = (mp_merchant_user_id, mp_id, body) => {
     return new Promise(function (resolve, reject) {
-        const { product_name, color, weight_kg, price, country_id_production, image_url } = body;
+        const { mp_name, mp_color, mp_weight_kg, mp_price, mp_c_id_production, mp_image_url } = body;
 
         let psql = `UPDATE merchant_products
-                SET product_name = '${product_name}', color = '${color}',
-                    weight_kg = '${weight_kg}', price = '${price}', country_id_production = '${country_id_production}', image_url = '${image_url}'
-                WHERE merchant_userid = '${merchant_userid}' AND id = '${product_id}'
+                SET mp_name = '${mp_name}', mp_color = '${mp_color}',
+                    mp_weight_kg = '${mp_weight_kg}', mp_price = '${mp_price}', mp_c_id_production = '${mp_c_id_production}', mp_image_url = '${mp_image_url}'
+                WHERE mp_merchant_user_id = '${mp_merchant_user_id}' AND mp_id = '${mp_id}'
                 RETURNING *`;
 
         pool.query(
@@ -50,19 +49,20 @@ const updateMerchantProduct = (merchant_userid, product_id, body) => {
 
 const createMerchantProduct = (body) => {
     return new Promise(function (resolve, reject) {
-        const { product_name, country_id_production, color, weight_kg, price, price_currency, image_url, merchant_userid } = body
-        let psql = `INSERT INTO merchant_products (product_name, country_id_production, color, weight_kg, price, price_currency, image_url, merchant_userid)
-                VALUES ('${product_name}', '${country_id_production}', '${color}', '${weight_kg}', '${price}', '${price_currency}', '${image_url}', '${merchant_userid}') RETURNING *;`;
+        const { mp_name, mp_c_id_production, mp_color, mp_weight_kg, mp_price, mp_currency, mp_image_url, mp_merchant_user_id } = body
+        let psql = `INSERT INTO merchant_products (mp_name, mp_c_id_production, mp_color, mp_weight_kg, mp_price, mp_currency, mp_image_url, mp_merchant_user_id)
+                VALUES ('${mp_name}', '${mp_c_id_production}', '${mp_color}', '${mp_weight_kg}', '${mp_price}', '${mp_currency}', '${mp_image_url}', '${mp_merchant_user_id}') RETURNING *;`;
         
         console.log(psql)
 
         pool.query(
             psql, (error, results) => {
                 if (error) {
+                    console.log(error);
                     reject(error)
                 }
-                console.log("Results ", results)
-                console.log("Type ", typeof results)
+                // console.log("Results ", results)
+                // console.log("Type ", typeof results)
                 if (typeof results == 'object' && 'rows' in results) {
                     resolve(results.rows)
                 } else {
@@ -72,22 +72,9 @@ const createMerchantProduct = (body) => {
     })
 }
 
-// Perhaps for a later version of the app
-// const createProductFull = (body) => {
-//     return new Promise(function (resolve, reject) {
-//       const { product, productioncountry, color, usagefrequency, weight_kg, sizelength, sizewidth, sizeheight, price, image_url } = body
-//       pool.query('INSERT INTO merchant_products (product, productioncountry, color, usagefrequency, weight_kg, sizelength, sizewidth, sizeheight, price, image_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *', [product, productioncountry, color, usagefrequency, weight_kg, sizelength, sizewidth, sizeheight, price, image_url], (error, results) => {
-//         if (error) {
-//           reject(error)
-//         }
-//         resolve(`A new product has been added added: ${results.rows[0]}`)
-//       })
-//     })
-//   }
-
-const initWithTestData = (merchant_userid) => {
-    let psql = require('../../data_templates/init_merchant_products.js');
-    psql = psql.replace(/{merchant_userid}/g, merchant_userid);
+const initWithTestData = (mp_merchant_user_id) => {
+    let psql = require('../data_templates/init_merchant_products.js');
+    psql = psql.replace(/{mp_merchant_user_id}/g, mp_merchant_user_id);
 
     return new Promise(function (resolve, reject) {
         pool.query(psql, (error, results) => {
@@ -95,14 +82,14 @@ const initWithTestData = (merchant_userid) => {
                 console.log(error);
                 reject(error)
             }
-            console.log(results[results.length - 1])
+            // console.log(results[results.length - 1])
             resolve(results[results.length - 1].rows)
         })
     })
 }
 
-const deleteMerchantProduct = (merchant_userid, productId) => {
-    let psql = `DELETE FROM merchant_products WHERE id = ${parseInt(productId)} and merchant_userid = '${merchant_userid}';`;
+const deleteMerchantProduct = (mp_merchant_user_id, mp_id) => {
+    let psql = `DELETE FROM merchant_products WHERE mp_id = ${parseInt(mp_id)} and mp_merchant_user_id = '${mp_merchant_user_id}';`;
     console.log(psql)
     return new Promise(function (resolve, reject) {
         pool.query(psql, (error, results) => {
@@ -110,20 +97,20 @@ const deleteMerchantProduct = (merchant_userid, productId) => {
                 console.log(error);
                 reject(error)
             }
-            resolve(`Product with id ${productId} deleted.`)
+            resolve(`Product with id ${mp_id} deleted.`)
         })
     })
 }
 
-const deleteAllMerchantProducts = (merchant_userid) => {
-    let psql = `DELETE FROM merchant_products WHERE merchant_userid = '${merchant_userid}';`
+const deleteAllMerchantProducts = (mp_merchant_user_id) => {
+    let psql = `DELETE FROM merchant_products WHERE mp_merchant_user_id = '${mp_merchant_user_id}';`
     return new Promise(function (resolve, reject) {
         pool.query(psql, (error, results) => {
             if (error) {
                 console.log(error);
                 reject(error)
             }
-            resolve(`All products deleted for merchant user id: ${merchant_userid}.`)
+            resolve(`All products deleted for merchant user id: ${mp_merchant_user_id}.`)
         })
     })
 }

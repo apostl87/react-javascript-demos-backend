@@ -4,7 +4,7 @@ const pool = dbinfo.pool;
 
 const getProducts = () => {
   return new Promise(function (resolve, reject) {
-    let psql = 'SELECT * FROM products JOIN countries ON products.country_id_production = countries.country_id ORDER BY products.id ASC';
+    let psql = 'SELECT * FROM products p JOIN countries c ON p.c_id_production = c.c_id ORDER BY p.p_id ASC';
     pool.query(psql, (error, results) => {
       if (error) {
         reject(error)
@@ -14,18 +14,22 @@ const getProducts = () => {
   })
 }
 
-const updateProduct = (id, body) => {
+const updateProduct = (p_id, body) => {
   return new Promise(function (resolve, reject) {
-    const { product_name, color, weight, price_currency, price, country_id, image_url} = body;
+    const { p_name, p_color, p_weight_kg, p_currency, p_price, p_c_id_production, p_image_url } = body;
 
     pool.query(
-      'UPDATE products SET product_name = $1, color = $2, weight_kg = $3, price = $4, country_id_production = $5, image_url = $6 WHERE id = $7 RETURNING *',
-      [product_name, color, weight, price, country_id, image_url, id],
+      'UPDATE products SET p_name = $1, p_color = $2, p_weight_kg = $3, p_price = $4, p_c_id_production = $5, p_image_url = $6 WHERE p_id = $7 RETURNING *',
+      [p_name, p_color, p_weight_kg, p_price, p_c_id_production, p_image_url, p_id],
       (error, results) => {
         if (error) {
           reject(error);
         }
-        resolve(`Product modified with ID: ${results.rows[0].id}`);
+        if (typeof results == 'object' && 'rows' in results) {
+          resolve(results.rows)
+        } else {
+          resolve(`Could not modify product.`)
+        }
       }
     );
   });
