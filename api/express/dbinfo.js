@@ -1,18 +1,7 @@
 const dotenv = require('dotenv')
+dotenv.config()
 const Pool = require('pg').Pool;
 
-// Take the correct .env file
-dotenv.config()
-let envFile = null
-if(process.env.NODE_ENV=='development') {
-  envFile = `.env.localdb`;
-  //envFile = `.env.remotedb`;
-} else {
-  envFile = `.env`;
-}
-dotenv.config({path: envFile})
-
-console.log("Env File: " + envFile)
 console.log("Database ", process.env.POSTGRES_DATABASE)
 console.log("SSL ", process.env.POSTGRES_USE_SSL)
 
