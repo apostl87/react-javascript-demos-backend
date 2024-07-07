@@ -22,15 +22,16 @@ const getMerchantProducts = (merchant_userid) => {
 // todo: debugging
 const updateMerchantProduct = (merchant_userid, product_id, body) => {
     return new Promise(function (resolve, reject) {
-        const { product_name, color, weight, price, country_id, image_url } = body;
+        const { product_name, color, weight_kg, price, country_id_production, image_url } = body;
 
-        let psql = `UPDATE merchant_products SET product_name = $1, color = $2, weight_kg = $3, price = $4, country_id_production = $5, image_url = $6
+        let psql = `UPDATE merchant_products
+                SET product_name = '${product_name}', color = '${color}',
+                    weight_kg = '${weight_kg}', price = '${price}', country_id_production = '${country_id_production}', image_url = '${image_url}'
                 WHERE merchant_userid = '${merchant_userid}' AND id = '${product_id}'
                 RETURNING *`;
 
         pool.query(
             psql,
-            [product_name, color, weight, price, country_id, image_url],
             (error, results) => {
                 if (error) {
                     reject(error);

@@ -10,29 +10,44 @@ const MerchantProductModel = require('./express/Models/MerchantProductModel.js')
 const app = express();
 const port = process.env.PORT || 3001;
 
-const jwtCheck = auth({
-  audience: 'https://vercel-express-postgres.vercel.app/',
-  issuerBaseURL: 'https://dev-do7e3my01rhnrak7.eu.auth0.com/',
-  tokenSigningAlg: 'RS256'
-});
-
-// enforce authorization on all endpoints
-// app.use(jwtCheck);
-
 // enforce using json-formatted data packages
 app.use(express.json());
 
-// Enable CORS for cross-origin requests
-app.use(cors({ origin: ["https://react-demos-one.vercel.app", "http://localhost:*"] }));
-
-
-app.use(function (req, res, next) {
+// Middleware for cross-origin requests
+let ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS.split(" ")
+app.use((req, res, next) => {
+	let origin = req.headers.origin;
+	let theOrigin = (ALLOWED_ORIGINS.indexOf(origin) >= 0) ? origin : ALLOWED_ORIGINS[0];
+	res.setHeader("Access-Control-Allow-Origin", theOrigin);
 	res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
-	res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Access-Control-Allow-Headers');
+	res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
 	next();
+})
+
+const jwtCheck = auth({
+	audience: 'https://vercel-express-postgres.vercel.app/',
+	issuerBaseURL: 'https://dev-do7e3my01rhnrak7.eu.auth0.com/',
+	tokenSigningAlg: 'RS256'
 });
 
-app.get('/products', (req, res) => {
+// Enforce authorization on all endpoints
+// app.use(jwtCheck); // This does not work correctly with the used version of express it seems
+
+app.get('/check-token', jwtCheck, (req, res) => {
+	res.status(200).send("Token is valid");
+})
+
+app.get('/countries', jwtCheck, (req, res) => {
+	CountryModel.getCountries()
+		.then(response => {
+			res.status(200).send(response);
+		})
+		.catch(error => {
+			res.status(500).send(error);
+		})
+})
+
+app.get('/products', jwtCheck, (req, res) => {
 	ProductModel.getProducts()
 		.then(response => {
 			res.status(200).send(response);
@@ -42,7 +57,7 @@ app.get('/products', (req, res) => {
 		})
 })
 
-app.post('/products/create', (req, res) => {
+app.post('/products/create', jwtCheck,  (req, res) => {
 	ProductModel.createProduct(req.body)
 		.then(response => {
 			res.status(200).send(response);
@@ -52,7 +67,7 @@ app.post('/products/create', (req, res) => {
 		})
 })
 
-app.delete('/products/:id', (req, res) => {
+app.delete('/products/:id', jwtCheck, (req, res) => {
 	ProductModel.deleteProduct(req.params.id)
 		.then(response => {
 			res.status(200).send(response);
@@ -62,7 +77,7 @@ app.delete('/products/:id', (req, res) => {
 		})
 })
 
-app.patch('/products/:id', (req, res) => {
+app.patch('/products/:id', jwtCheck, (req, res) => {
 	const id = parseInt(req.params.id);
 	ProductModel.updateProduct(id, req.body)
 		.then(response => {
@@ -73,17 +88,9 @@ app.patch('/products/:id', (req, res) => {
 		})
 })
 
-app.get('/countries', (req, res) => {
-	CountryModel.getCountries()
-		.then(response => {
-			res.status(200).send(response);
-		})
-		.catch(error => {
-			res.status(500).send(error);
-		})
-})
 
-app.get('/merchant-products/:merchant_userid', (req, res) => {
+
+app.get('/merchant-products/:merchant_userid', jwtCheck, (req, res) => {
 	MerchantProductModel.getMerchantProducts(req.params.merchant_userid)
 		.then(response => {
 			res.status(200).send(response);
@@ -93,7 +100,8 @@ app.get('/merchant-products/:merchant_userid', (req, res) => {
 		})
 })
 
-app.patch('/merchant-products/:merchant_userid/:product_id', (req, res) => {
+app.patch('/merchant-products/:merchant_userid/:product_id', jwtCheck, (req, res) => {
+	console.log("Call received")
 	MerchantProductModel.updateMerchantProduct(req.params.merchant_userid, req.params.product_id, req.body)
 		.then(response => {
 			res.status(200).send(response);
@@ -103,7 +111,7 @@ app.patch('/merchant-products/:merchant_userid/:product_id', (req, res) => {
 		})
 })
 
-app.post('/merchant-products/create', (req, res) => {
+app.post('/merchant-products/create', jwtCheck, (req, res) => {
 	MerchantProductModel.createMerchantProduct(req.body)
 		.then(response => {
 			res.status(200).send(response);
@@ -113,7 +121,7 @@ app.post('/merchant-products/create', (req, res) => {
 		})
 })
 
-app.post('/merchant-products/:merchant_userid/init', (req, res) => {
+app.get('/merchant-products/:merchant_userid/init', jwtCheck, (req, res) => {
 	MerchantProductModel.initWithTestData(req.params.merchant_userid)
 		.then(response => {
 			res.status(200).send(response);
@@ -123,7 +131,7 @@ app.post('/merchant-products/:merchant_userid/init', (req, res) => {
 		})
 })
 
-app.delete('/merchant-products/:merchant_userid/:product_id', (req, res) => {
+app.delete('/merchant-products/:merchant_userid/:product_id', jwtCheck, (req, res) => {
 	MerchantProductModel.deleteMerchantProduct(req.params.merchant_userid, req.params.product_id)
 		.then(response => {
 			res.status(200).send(response);
@@ -133,7 +141,7 @@ app.delete('/merchant-products/:merchant_userid/:product_id', (req, res) => {
 		})
 })
 
-app.delete('/merchant-products/:merchant_userid', (req, res) => {
+app.delete('/merchant-products/:merchant_userid', jwtCheck, (req, res) => {
 	MerchantProductModel.deleteAllMerchantProducts(req.params.merchant_userid)
 		.then(response => {
 			res.status(200).send(response);
