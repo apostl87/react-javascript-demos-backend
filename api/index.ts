@@ -3,9 +3,9 @@ const { auth } = require('express-oauth2-jwt-bearer');
 const cors = require('cors');
 require('dotenv');
 
-const ProductModel = require('./express/Models/ProductModel.js');
-const CountryModel = require('./express/Models/CountryModel.js');
-const MerchantProductModel = require('./express/Models/MerchantProductModel.js');
+const ProductModel = require('./Models/ProductModel.js');
+const CountryModel = require('./Models/CountryModel.js');
+const MerchantProductModel = require('./Models/MerchantProductModel.js');
 
 const app = express();
 const port = process.env.PORT || 3001;
