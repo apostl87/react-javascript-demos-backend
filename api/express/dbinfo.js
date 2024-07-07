@@ -5,8 +5,8 @@ const Pool = require('pg').Pool;
 dotenv.config()
 let envFile = null
 if(process.env.NODE_ENV=='development') {
-  envFile = `.env.postgres-local`;
-  //envFile = `.env.local`;
+  envFile = `.env.localdb`;
+  //envFile = `.env.remotedb`;
 } else {
   envFile = `.env`;
 }

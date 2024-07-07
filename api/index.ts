@@ -9,12 +9,19 @@ const MerchantProductModel = require('./express/Models/MerchantProductModel.js')
 
 const app = express();
 const port = process.env.PORT || 3001;
+const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS.split(" ")
+const audience = process.env.AUTH0_API_AUDIENCE;
+const issuerBaseURL = process.env.AUTH0_BASE_URL;
+const jwtCheck = auth({
+	audience: audience,
+	issuerBaseURL: issuerBaseURL,
+	tokenSigningAlg: 'RS256'
+});
 
-// enforce using json-formatted data packages
+// Enforce using json-formatted data packages
 app.use(express.json());
 
 // Middleware for cross-origin requests
-let ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS.split(" ")
 app.use((req, res, next) => {
 	let origin = req.headers.origin;
 	let theOrigin = (ALLOWED_ORIGINS.indexOf(origin) >= 0) ? origin : ALLOWED_ORIGINS[0];
@@ -23,12 +30,6 @@ app.use((req, res, next) => {
 	res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
 	next();
 })
-
-const jwtCheck = auth({
-	audience: 'https://vercel-express-postgres.vercel.app/',
-	issuerBaseURL: 'https://dev-do7e3my01rhnrak7.eu.auth0.com/',
-	tokenSigningAlg: 'RS256'
-});
 
 // Enforce authorization on all endpoints
 // app.use(jwtCheck); // This does not work correctly with the used version of express it seems
