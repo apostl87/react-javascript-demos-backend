@@ -6,7 +6,7 @@
   "license": "ISC",
   "description": "Express Backend served by a Postgres DB",
   "scripts": {
-    "start": "node api/index.ts",
+    "start": "node api/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {

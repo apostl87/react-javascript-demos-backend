@@ -9,7 +9,7 @@ const MerchantProductModel = require('./Models/MerchantProductModel.js');
 
 const app = express();
 const port = process.env.PORT || 3001;
-let ALLOWED_ORIGINS: string[] = [];
+let ALLOWED_ORIGINS = [];
 if (process.env.ALLOWED_ORIGINS) {
 	ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS.split(" ")
 }
@@ -35,7 +35,7 @@ app.use((req, res, next) => {
 })
 
 // Enforce authorization on all endpoints
-// app.use(jwtCheck); // This does not work correctly with the used version of express it seems
+//app.use(jwtCheck); // This does not work correctly with the used version of express it seems
 
 app.get('/check-token', jwtCheck, (req, res) => {
 	res.status(200).send("Token is valid");

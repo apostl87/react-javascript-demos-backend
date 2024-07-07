@@ -4,7 +4,7 @@ const pool = dbinfo.pool;
 
 const getProducts = () => {
   return new Promise(function (resolve, reject) {
-    let psql = 'SELECT * FROM products p JOIN countries c ON p.c_id_production = c.c_id ORDER BY p.p_id ASC';
+    let psql = 'SELECT * FROM products p JOIN countries c ON p.p_c_id_production = c.c_id ORDER BY p.p_id ASC';
     pool.query(psql, (error, results) => {
       if (error) {
         reject(error)
