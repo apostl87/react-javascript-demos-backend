@@ -21,7 +21,7 @@ const jwtCheck = auth({
 	tokenSigningAlg: 'RS256'
 });
 
-// Enforce using json-formatted data packages
+// Parse incoming requests with JSON payloads
 app.use(express.json());
 
 // Middleware for cross-origin requests

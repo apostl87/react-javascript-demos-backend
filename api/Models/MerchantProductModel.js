@@ -103,7 +103,7 @@ const deleteMerchantProduct = (mp_merchant_user_id, mp_id) => {
                 console.log(error);
                 reject(error)
             }
-            resolve(`Product with id ${mp_id} deleted.`)
+            resolve(`Product with ID ${mp_id} deleted.`)
         })
     })
 }
@@ -116,7 +116,7 @@ const deleteAllMerchantProducts = (mp_merchant_user_id) => {
                 console.log(error);
                 reject(error)
             }
-            resolve(`All products deleted for merchant user id: ${mp_merchant_user_id}.`)
+            resolve(`All products deleted for merchant user ID ${mp_merchant_user_id}.`)
         })
     })
 }
