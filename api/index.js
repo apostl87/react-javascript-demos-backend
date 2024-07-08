@@ -37,11 +37,11 @@ app.use((req, res, next) => {
 // Enforce authorization on all endpoints
 //app.use(jwtCheck); // This does not work correctly with the used version of express it seems
 
-app.get('/check-token', jwtCheck, (req, res) => {
+app.get('/check-token', (req, res) => {
 	res.status(200).send("Token is valid");
 })
 
-app.get('/countries', jwtCheck, (req, res) => {
+app.get('/countries', (req, res) => {
 	CountryModel.getCountries()
 		.then(response => {
 			res.status(200).send(response);
@@ -51,7 +51,7 @@ app.get('/countries', jwtCheck, (req, res) => {
 		})
 })
 
-app.get('/products', jwtCheck, (req, res) => {
+app.get('/products', (req, res) => {
 	ProductModel.getProducts()
 		.then(response => {
 			res.status(200).send(response);
@@ -61,7 +61,7 @@ app.get('/products', jwtCheck, (req, res) => {
 		})
 })
 
-app.post('/products/create', jwtCheck,  (req, res) => {
+app.post('/products/create',  (req, res) => {
 	ProductModel.createProduct(req.body)
 		.then(response => {
 			res.status(200).send(response);
@@ -71,7 +71,7 @@ app.post('/products/create', jwtCheck,  (req, res) => {
 		})
 })
 
-app.delete('/products/:id', jwtCheck, (req, res) => {
+app.delete('/products/:id', (req, res) => {
 	ProductModel.deleteProduct(req.params.id)
 		.then(response => {
 			res.status(200).send(response);
@@ -81,7 +81,7 @@ app.delete('/products/:id', jwtCheck, (req, res) => {
 		})
 })
 
-app.patch('/products/:id', jwtCheck, (req, res) => {
+app.patch('/products/:id', (req, res) => {
 	const id = parseInt(req.params.id);
 	ProductModel.updateProduct(id, req.body)
 		.then(response => {
@@ -94,7 +94,7 @@ app.patch('/products/:id', jwtCheck, (req, res) => {
 
 
 
-app.get('/merchant-products/:merchant_userid', jwtCheck, (req, res) => {
+app.get('/merchant-products/:merchant_userid', (req, res) => {
 	MerchantProductModel.getMerchantProducts(req.params.merchant_userid)
 		.then(response => {
 			res.status(200).send(response);
@@ -104,7 +104,7 @@ app.get('/merchant-products/:merchant_userid', jwtCheck, (req, res) => {
 		})
 })
 
-app.patch('/merchant-products/:merchant_userid/:product_id', jwtCheck, (req, res) => {
+app.patch('/merchant-products/:merchant_userid/:product_id', (req, res) => {
 	MerchantProductModel.updateMerchantProduct(req.params.merchant_userid, req.params.product_id, req.body)
 		.then(response => {
 			res.status(200).send(response);
@@ -114,7 +114,7 @@ app.patch('/merchant-products/:merchant_userid/:product_id', jwtCheck, (req, res
 		})
 })
 
-app.post('/merchant-products/create', jwtCheck, (req, res) => {
+app.post('/merchant-products/create', (req, res) => {
 	MerchantProductModel.createMerchantProduct(req.body)
 		.then(response => {
 			res.status(200).send(response);
@@ -124,7 +124,7 @@ app.post('/merchant-products/create', jwtCheck, (req, res) => {
 		})
 })
 
-app.get('/merchant-products/:merchant_userid/init', jwtCheck, (req, res) => {
+app.get('/merchant-products/:merchant_userid/init', (req, res) => {
 	MerchantProductModel.initWithTestData(req.params.merchant_userid)
 		.then(response => {
 			res.status(200).send(response);
@@ -134,7 +134,7 @@ app.get('/merchant-products/:merchant_userid/init', jwtCheck, (req, res) => {
 		})
 })
 
-app.delete('/merchant-products/:merchant_userid/:product_id', jwtCheck, (req, res) => {
+app.delete('/merchant-products/:merchant_userid/:product_id', (req, res) => {
 	MerchantProductModel.deleteMerchantProduct(req.params.merchant_userid, req.params.product_id)
 		.then(response => {
 			res.status(200).send(response);
@@ -144,7 +144,7 @@ app.delete('/merchant-products/:merchant_userid/:product_id', jwtCheck, (req, re
 		})
 })
 
-app.delete('/merchant-products/:merchant_userid', jwtCheck, (req, res) => {
+app.delete('/merchant-products/:merchant_userid', (req, res) => {
 	MerchantProductModel.deleteAllMerchantProducts(req.params.merchant_userid)
 		.then(response => {
 			res.status(200).send(response);
