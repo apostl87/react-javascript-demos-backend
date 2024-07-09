@@ -5,6 +5,7 @@ const pool = dbinfo.pool;
 const getMerchantProducts = (mp_merchant_user_id) => {
     return new Promise(function (resolve, reject) {
         let psql = psql_select_all(mp_merchant_user_id);
+        console.log(psql);
         pool.query(psql, (error, results) => {
             if (error) {
                 reject(error)
@@ -49,6 +50,10 @@ const updateMerchantProduct = (mp_merchant_user_id, mp_id, body) => {
 const createMerchantProduct = (body) => {
     return new Promise(function (resolve, reject) {
         const { mp_name, mp_c_id_production, mp_color, mp_weight_kg, mp_price, mp_currency, mp_image_url, mp_merchant_user_id } = body
+
+        // Conversion from -1 to null is necessary because of the sanitization method in index.js
+        if (mp_c_id_production == -1) mp_c_id_production = 'null';
+
         let psql = `INSERT INTO merchant_products (mp_name, mp_c_id_production, mp_color, mp_weight_kg, mp_price, mp_currency, mp_image_url, mp_merchant_user_id)
                 VALUES ('${mp_name}', ${mp_c_id_production}, '${mp_color}', '${mp_weight_kg}', '${mp_price}', '${mp_currency}', '${mp_image_url}', '${mp_merchant_user_id}') RETURNING *;`;
 

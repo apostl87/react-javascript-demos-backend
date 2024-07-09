@@ -1,5 +1,6 @@
 const express = require('express');
 const { auth } = require('express-oauth2-jwt-bearer');
+const { check, validationResult } = require('express-validator'); // Basic sanitization to protect from SQL injections
 const cors = require('cors');
 require('dotenv');
 
@@ -9,10 +10,8 @@ const MerchantProductModel = require('./Models/MerchantProductModel.js');
 
 const app = express();
 const port = process.env.PORT || 3001;
-let ALLOWED_ORIGINS = [];
-if (process.env.ALLOWED_ORIGINS) {
-	ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS.split(" ")
-}
+
+// JWT Validation
 const audience = process.env.AUTH0_API_AUDIENCE;
 const issuerBaseURL = process.env.AUTH0_BASE_URL;
 const jwtCheck = auth({
@@ -25,6 +24,10 @@ const jwtCheck = auth({
 app.use(express.json());
 
 // Middleware for cross-origin requests
+let ALLOWED_ORIGINS = [];
+if (process.env.ALLOWED_ORIGINS) {
+	ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS.split(" ")
+}
 app.use((req, res, next) => {
 	let origin = req.headers.origin;
 	let theOrigin = (ALLOWED_ORIGINS.indexOf(origin) >= 0) ? origin : ALLOWED_ORIGINS[0];
@@ -37,7 +40,15 @@ app.use((req, res, next) => {
 // Enforce authorization on all endpoints
 //app.use(jwtCheck); // This does not work correctly with the used version of express it seems
 
-app.get('/check-token', (req, res) => {
+// Basic sanitization and validation checks by express-validator
+let sanitizeAndValidate = [
+	check('**', '').escape(),
+	check('mp_c_id_production', '').isInt().optional({values: 'undefined'}),
+]
+
+
+// Endpoints
+app.get('/check-token', jwtCheck, (req, res) => {
 	res.status(200).send("Token is valid");
 })
 
@@ -61,8 +72,17 @@ app.get('/products', (req, res) => {
 		})
 })
 
-app.post('/products/create',  (req, res) => {
-	ProductModel.createProduct(req.body)
+app.get('/merchant-products/:merchant_user_id', sanitizeAndValidate, (req, res) => {
+	// console.log(req.params.merchant_user_id);
+
+	const valRes = validationResult(req);
+	if (valRes.errors.length) {
+		console.log("Validation error(s): ", valRes.errors);
+		res.status(500).send(valRes.errors);
+		return;
+	}
+
+	MerchantProductModel.getMerchantProducts(req.params.merchant_user_id)
 		.then(response => {
 			res.status(200).send(response);
 		})
@@ -71,8 +91,16 @@ app.post('/products/create',  (req, res) => {
 		})
 })
 
-app.delete('/products/:id', (req, res) => {
-	ProductModel.deleteProduct(req.params.id)
+app.patch('/merchant-products/:merchant_user_id/:product_id', sanitizeAndValidate, (req, res) => {
+
+	const valRes = validationResult(req);
+	if (valRes.errors.length) {
+		console.log("Validation error(s): ", valRes.errors);
+		res.status(500).send(valRes.errors);
+		return;
+	}
+
+	MerchantProductModel.updateMerchantProduct(req.params.merchant_user_id, req.params.product_id, req.body)
 		.then(response => {
 			res.status(200).send(response);
 		})
@@ -81,40 +109,15 @@ app.delete('/products/:id', (req, res) => {
 		})
 })
 
-app.patch('/products/:id', (req, res) => {
-	const id = parseInt(req.params.id);
-	ProductModel.updateProduct(id, req.body)
-		.then(response => {
-			res.status(200).send(response);
-		})
-		.catch(error => {
-			res.status(500).send(error);
-		})
-})
+app.post('/merchant-products/create', sanitizeAndValidate, (req, res) => {
 
+	const valRes = validationResult(req);
+	if (valRes.errors.length) {
+		console.log("Validation error(s): ", valRes.errors);
+		res.status(500).send(valRes.errors);
+		return;
+	}
 
-
-app.get('/merchant-products/:merchant_userid', (req, res) => {
-	MerchantProductModel.getMerchantProducts(req.params.merchant_userid)
-		.then(response => {
-			res.status(200).send(response);
-		})
-		.catch(error => {
-			res.status(500).send(error);
-		})
-})
-
-app.patch('/merchant-products/:merchant_userid/:product_id', (req, res) => {
-	MerchantProductModel.updateMerchantProduct(req.params.merchant_userid, req.params.product_id, req.body)
-		.then(response => {
-			res.status(200).send(response);
-		})
-		.catch(error => {
-			res.status(500).send(error);
-		})
-})
-
-app.post('/merchant-products/create', (req, res) => {
 	MerchantProductModel.createMerchantProduct(req.body)
 		.then(response => {
 			res.status(200).send(response);
@@ -124,8 +127,16 @@ app.post('/merchant-products/create', (req, res) => {
 		})
 })
 
-app.get('/merchant-products/:merchant_userid/init', (req, res) => {
-	MerchantProductModel.initWithTestData(req.params.merchant_userid)
+app.get('/merchant-products/:merchant_user_id/init', sanitizeAndValidate, (req, res) => {
+
+	const valRes = validationResult(req);
+	if (valRes.errors.length) {
+		console.log("Validation error(s): ", valRes.errors);
+		res.status(500).send(valRes.errors);
+		return;
+	}
+
+	MerchantProductModel.initWithTestData(req.params.merchant_user_id)
 		.then(response => {
 			res.status(200).send(response);
 		})
@@ -134,8 +145,16 @@ app.get('/merchant-products/:merchant_userid/init', (req, res) => {
 		})
 })
 
-app.delete('/merchant-products/:merchant_userid/:product_id', (req, res) => {
-	MerchantProductModel.deleteMerchantProduct(req.params.merchant_userid, req.params.product_id)
+app.delete('/merchant-products/:merchant_user_id/:product_id', sanitizeAndValidate, (req, res) => {
+
+	const valRes = validationResult(req);
+	if (valRes.errors.length) {
+		console.log("Validation error(s): ", valRes.errors);
+		res.status(500).send(valRes.errors);
+		return;
+	}
+
+	MerchantProductModel.deleteMerchantProduct(req.params.merchant_user_id, req.params.product_id)
 		.then(response => {
 			res.status(200).send(response);
 		})
@@ -144,8 +163,16 @@ app.delete('/merchant-products/:merchant_userid/:product_id', (req, res) => {
 		})
 })
 
-app.delete('/merchant-products/:merchant_userid', (req, res) => {
-	MerchantProductModel.deleteAllMerchantProducts(req.params.merchant_userid)
+app.delete('/merchant-products/:merchant_user_id', sanitizeAndValidate,  (req, res) => {
+
+	const valRes = validationResult(req);
+	if (valRes.errors.length) {
+		console.log("Validation error(s): ", valRes.errors);
+		res.status(500).send(valRes.errors);
+		return;
+	}
+	
+	MerchantProductModel.deleteAllMerchantProducts(req.params.merchant_user_id)
 		.then(response => {
 			res.status(200).send(response);
 		})
