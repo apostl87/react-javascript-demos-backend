@@ -5,7 +5,7 @@ const pool = dbinfo.pool;
 const getMerchantProducts = (mp_merchant_user_id) => {
     return new Promise(function (resolve, reject) {
         let psql = psql_select_all(mp_merchant_user_id);
-        console.log(psql);
+
         pool.query(psql, (error, results) => {
             if (error) {
                 reject(error)
@@ -24,13 +24,14 @@ const updateMerchantProduct = (mp_merchant_user_id, mp_id, body) => {
         const { mp_name, mp_color, mp_weight_kg, mp_price, mp_c_id_production, mp_image_url } = body;
 
         let psql = `UPDATE merchant_products
-                SET mp_name = '${mp_name}', mp_color = '${mp_color}',
-                    mp_weight_kg = '${mp_weight_kg}', mp_price = '${mp_price}', mp_c_id_production = ${mp_c_id_production}, mp_image_url = '${mp_image_url}'
-                WHERE mp_merchant_user_id = '${mp_merchant_user_id}' AND mp_id = '${mp_id}'
-                RETURNING *`;
+                SET mp_name = $1, mp_color = $2, 
+                     mp_weight_kg = '${mp_weight_kg}', mp_price = '${mp_price}', mp_c_id_production = ${mp_c_id_production}, mp_image_url = '${mp_image_url}'
+                 WHERE mp_merchant_user_id = '${mp_merchant_user_id}' AND mp_id = '${mp_id}'
+                 RETURNING *`;
 
         pool.query(
             psql,
+            [mp_name, mp_color],
             (error, results) => {
                 if (error) {
                     console.log(error);

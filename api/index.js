@@ -43,7 +43,7 @@ app.use((req, res, next) => {
 // Basic sanitization and validation checks by express-validator
 let sanitizeAndValidate = [
 	check('**', '').escape(),
-	check('mp_c_id_production', '').isInt().optional({values: 'undefined'}),
+	//check('mp_c_id_production', '').isInt().optional({values: 'undefined'}),
 ]
 
 
@@ -127,7 +127,7 @@ app.post('/merchant-products/create', sanitizeAndValidate, (req, res) => {
 		})
 })
 
-app.get('/merchant-products/:merchant_user_id/init', sanitizeAndValidate, (req, res) => {
+app.post('/merchant-products/:merchant_user_id/init', sanitizeAndValidate, (req, res) => {
 
 	const valRes = validationResult(req);
 	if (valRes.errors.length) {
