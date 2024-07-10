@@ -1,4 +1,5 @@
 const dbinfo = require('../dbinfo.js');
+const config = require('../config.js');
 const pool = dbinfo.pool;
 
 const psql_select_per_user_id = `
@@ -15,13 +16,25 @@ const getMerchantProducts = (mp_merchant_user_id) => {
                 if (error) {
                     reject(error)
                 }
-                if (typeof results == 'object' && 'rows' in results) {
-                    resolve(results.rows)
-                } else {
-                    resolve(`No products fetched.`)
-                }
+                resolve(results.rows);
             })
     })
+}
+
+const countMerchantProducts = (mp_merchant_user_id) => {
+    let psql = "SELECT count(*) FROM merchant_products WHERE merchant_user_id = $1";
+
+    return new Promise(function (resolve, reject) {
+        pool.query(psql,
+            [mp_merchant_user_id],
+            (error, results) => {
+                if (error) {
+                    reject(error)
+                }
+                resolve(results.rows)
+            }
+        );
+    });
 }
 
 const updateMerchantProduct = (mp_merchant_user_id, mp_id, body) => {
@@ -41,61 +54,79 @@ const updateMerchantProduct = (mp_merchant_user_id, mp_id, body) => {
                     console.log(error);
                     reject(error);
                 }
-                if (typeof results == 'object' && 'rows' in results) {
-                    resolve(results.rows)
-                } else {
-                    resolve(`Could not modify product.`)
-                }
+                resolve(results.rows);
             }
         );
     });
 };
 
 const createMerchantProduct = (body) => {
-    const { mp_name, mp_c_id_production, mp_color, mp_weight_kg, mp_price, mp_currency, mp_image_url, mp_merchant_user_id } = body;
-
-    let psql = `INSERT INTO merchant_products (mp_name, mp_c_id_production, mp_color, mp_weight_kg,
-                            mp_price, mp_currency, mp_image_url, mp_merchant_user_id)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-                RETURNING *`;
-
+    
     return new Promise((resolve, reject) => {
-        pool.query(psql,
-            [mp_name, mp_c_id_production, mp_color, mp_weight_kg, mp_price, mp_currency, mp_image_url, mp_merchant_user_id],
-            (error, results) => {
-                if (error) {
-                    console.log(error);
-                    reject(error);
-                }
-                if (typeof results === 'object' && 'rows' in results) {
-                    resolve(results.rows);
+        // Check the number of records before creating
+        MerchantProductModel.getMerchantProducts(body.mp_merchant_user_id)
+            .then(response => {
+                if (response.length >= config.maxProductsPerUser) {
+                    reject(`Cannot create a new product. Maximum number of products (limit: ${maxProductsPerUser}) reached.`);
                 } else {
-                    resolve(`Could not add product.`);
+                    // Create the new merchant product
+                    let psql = `INSERT INTO merchant_products (mp_name, mp_c_id_production, mp_color, mp_weight_kg,
+                                                                mp_price, mp_currency, mp_image_url, mp_merchant_user_id)
+                                VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                                RETURNING *`;
+                    const { mp_name, mp_c_id_production, mp_color, mp_weight_kg, mp_price, mp_currency, mp_image_url, mp_merchant_user_id } = body;
+
+                    pool.query(psql,
+                        [mp_name, mp_c_id_production, mp_color, mp_weight_kg, mp_price, mp_currency, mp_image_url, mp_merchant_user_id],
+                        (error, results) => {
+                            if (error) {
+                                console.log(error);
+                                reject(error);
+                            }
+                            resolve(results.rows);
+                        });
                 }
+            })
+            .catch(error => {
+                reject(error);
             });
     });
 };
 
 const initWithTestData = (mp_merchant_user_id) => {
-    let psql = require('../data_templates/init_merchant_products.js');
 
     return new Promise(function (resolve, reject) {
-        pool.query(psql,
-            [mp_merchant_user_id],
-            (error, results) => {
-                if (error) {
-                    console.log(error);
-                    reject(error)
-                }
-                try {
-                    resolve(results.rows)
-                } catch (e) {
-                    console.log(e)
-                    resolve(`No products fetched.`)
+        // Check the number of records before creating
+        MerchantProductModel.getMerchantProducts(mp_merchant_user_id)
+            .then(response => {
+                if (response.length > 0) {
+                    reject(`Initialization with test data aborted (A product already exists for this merchant (ID: ${mp_merchant_user_id}).`);
+                } else {
+                    // Initialize the merchant's portfolio with test data
+                    let psql = require('../data_templates/init_merchant_products.js');
+
+                    pool.query(psql,
+                        [mp_merchant_user_id],
+                        (error, results) => {
+                            if (error) {
+                                console.log(error);
+                                reject(error)
+                            }
+                            try {
+                                resolve(results.rows)
+                            } catch (err) {
+                                console.log(err)
+                                resolve(`No products added.`)
+                            }
+                        }
+                    )
                 }
             })
-    })
-}
+            .catch(error => {
+                reject(error);
+            });
+    });
+};
 
 const deleteMerchantProduct = (mp_merchant_user_id, mp_id) => {
     let psql = `DELETE FROM merchant_products WHERE mp_id = $1 and mp_merchant_user_id = $2;`;
