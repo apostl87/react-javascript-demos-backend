@@ -22,7 +22,7 @@ const getMerchantProducts = (mp_merchant_user_id) => {
 }
 
 const countMerchantProducts = (mp_merchant_user_id) => {
-    let psql = "SELECT count(*) FROM merchant_products WHERE merchant_user_id = $1";
+    let psql = "SELECT count(*) FROM merchant_products WHERE mp_merchant_user_id = $1";
 
     return new Promise(function (resolve, reject) {
         pool.query(psql,
@@ -31,6 +31,7 @@ const countMerchantProducts = (mp_merchant_user_id) => {
                 if (error) {
                     reject(error)
                 }
+                console.log(results);
                 resolve(results.rows)
             }
         );
@@ -61,10 +62,10 @@ const updateMerchantProduct = (mp_merchant_user_id, mp_id, body) => {
 };
 
 const createMerchantProduct = (body) => {
-    
+
     return new Promise((resolve, reject) => {
         // Check the number of records before creating
-        MerchantProductModel.getMerchantProducts(body.mp_merchant_user_id)
+        getMerchantProducts(body.mp_merchant_user_id)
             .then(response => {
                 if (response.length >= config.maxProductsPerUser) {
                     reject(`Cannot create a new product. Maximum number of products (limit: ${maxProductsPerUser}) reached.`);
@@ -97,9 +98,10 @@ const initWithTestData = (mp_merchant_user_id) => {
 
     return new Promise(function (resolve, reject) {
         // Check the number of records before creating
-        MerchantProductModel.getMerchantProducts(mp_merchant_user_id)
+        countMerchantProducts(mp_merchant_user_id)
             .then(response => {
-                if (response.length > 0) {
+                console.log(response);
+                if (response[0].count > 0) {
                     reject(`Initialization with test data aborted (A product already exists for this merchant (ID: ${mp_merchant_user_id}).`);
                 } else {
                     // Initialize the merchant's portfolio with test data

@@ -105,6 +105,7 @@ app.post('/merchant-products/create', (req, res) => {
 })
 
 app.post('/merchant-products/:merchant_userid/init', (req, res) => {
+	console.log("Endpoint called");
 	MerchantProductModel.initWithTestData(req.params.merchant_userid)
 		.then(response => {
 			res.status(200).send(response);

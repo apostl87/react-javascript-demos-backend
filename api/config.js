@@ -1,3 +1,3 @@
 const config = {
-    maxProductsPerUser: 200
+    maxProductsPerUser: 50
 }
