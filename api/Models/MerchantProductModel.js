@@ -3,10 +3,12 @@ const config = require('../config.js');
 const pool = dbinfo.pool;
 
 const psql_select_per_user_id = `
-    SELECT * FROM merchant_products mp LEFT JOIN countries c ON mp.mp_c_id_production = c.c_id
-    WHERE mp.mp_merchant_user_id = $1 ORDER BY mp.mp_id ASC`;
+SELECT * FROM merchant_products mp LEFT JOIN countries c ON mp.mp_c_id_production = c.c_id 
+WHERE mp.mp_merchant_user_id = $1 ORDER BY mp.mp_id ASC;
+`;
 
 const getMerchantProducts = (mp_merchant_user_id) => {
+
     let psql = psql_select_per_user_id;
 
     return new Promise(function (resolve, reject) {
@@ -16,9 +18,11 @@ const getMerchantProducts = (mp_merchant_user_id) => {
                 if (error) {
                     reject(error)
                 }
+                // console.log(results);
                 resolve(results.rows);
             })
     })
+
 }
 
 const countMerchantProducts = (mp_merchant_user_id) => {
@@ -31,7 +35,7 @@ const countMerchantProducts = (mp_merchant_user_id) => {
                 if (error) {
                     reject(error)
                 }
-                console.log(results);
+                //console.log(results);
                 resolve(results.rows)
             }
         );
@@ -55,6 +59,7 @@ const updateMerchantProduct = (mp_merchant_user_id, mp_id, body) => {
                     console.log(error);
                     reject(error);
                 }
+                //console.log(results)
                 resolve(results.rows);
             }
         );
