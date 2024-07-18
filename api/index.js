@@ -16,7 +16,8 @@ const issuerBaseURL = process.env.AUTH0_BASE_URL;
 const jwtCheck = auth({
 	audience: audience,
 	issuerBaseURL: issuerBaseURL,
-	tokenSigningAlg: 'RS256'
+	tokenSigningAlg: 'RS256',
+	authRequired: false, // OF COURSE, THIS SETTING IS ONLY USED IF THE QUOTA IS EXCEEDED.
 });
 
 // Middleware for parsing incoming requests with JSON payloads
@@ -43,7 +44,7 @@ app.get('/check-token', jwtCheck, (req, res) => {
 	res.status(200).send("Token is valid");
 })
 
-app.get('/countries', (req, res) => {
+app.get('/countries', jwtCheck, (req, res) => {
 	CountryModel.getCountries()
 		.then(response => {
 			res.status(200).send(response);
@@ -53,7 +54,7 @@ app.get('/countries', (req, res) => {
 		})
 })
 
-app.get('/products', (req, res) => {
+app.get('/products', jwtCheck, (req, res) => {
 	ProductModel.getProducts()
 		.then(response => {
 			res.status(200).send(response);
@@ -63,7 +64,7 @@ app.get('/products', (req, res) => {
 		})
 })
 
-app.patch('/products/:id', (req, res) => {
+app.patch('/products/:id', jwtCheck, (req, res) => {
 	const id = parseInt(req.params.id);
 	ProductModel.updateProduct(id, req.body)
 		.then(response => {
@@ -74,7 +75,7 @@ app.patch('/products/:id', (req, res) => {
 		})
 })
 
-app.get('/merchant-products/:merchant_userid', (req, res) => {
+app.get('/merchant-products/:merchant_userid', jwtCheck, (req, res) => {
 	MerchantProductModel.getMerchantProducts(req.params.merchant_userid)
 		.then(response => {
 			res.status(200).send(response);
@@ -84,7 +85,7 @@ app.get('/merchant-products/:merchant_userid', (req, res) => {
 		})
 })
 
-app.patch('/merchant-products/:merchant_userid/:product_id', (req, res) => {
+app.patch('/merchant-products/:merchant_userid/:product_id', jwtCheck, (req, res) => {
 	MerchantProductModel.updateMerchantProduct(req.params.merchant_userid, req.params.product_id, req.body)
 		.then(response => {
 			res.status(200).send(response);
@@ -94,7 +95,7 @@ app.patch('/merchant-products/:merchant_userid/:product_id', (req, res) => {
 		})
 })
 
-app.post('/merchant-products/create', (req, res) => {
+app.post('/merchant-products/create', jwtCheck, (req, res) => {
 	MerchantProductModel.createMerchantProduct(req.body)
 		.then(response => {
 			res.status(200).send(response);
@@ -104,8 +105,7 @@ app.post('/merchant-products/create', (req, res) => {
 		})
 })
 
-app.post('/merchant-products/:merchant_userid/init', (req, res) => {
-	console.log("Endpoint called");
+app.post('/merchant-products/:merchant_userid/init', jwtCheck, (req, res) => {
 	MerchantProductModel.initWithTestData(req.params.merchant_userid)
 		.then(response => {
 			res.status(200).send(response);
@@ -115,7 +115,7 @@ app.post('/merchant-products/:merchant_userid/init', (req, res) => {
 		})
 })
 
-app.delete('/merchant-products/:merchant_userid/:product_id', (req, res) => {
+app.delete('/merchant-products/:merchant_userid/:product_id', jwtCheck, (req, res) => {
 	MerchantProductModel.deleteMerchantProduct(req.params.merchant_userid, req.params.product_id)
 		.then(response => {
 			res.status(200).send(response);
@@ -125,7 +125,7 @@ app.delete('/merchant-products/:merchant_userid/:product_id', (req, res) => {
 		})
 })
 
-app.delete('/merchant-products/:merchant_userid', (req, res) => {
+app.delete('/merchant-products/:merchant_userid', jwtCheck, (req, res) => {
 	MerchantProductModel.deleteAllMerchantProducts(req.params.merchant_userid)
 		.then(response => {
 			res.status(200).send(response);

@@ -105,7 +105,7 @@ const initWithTestData = (mp_merchant_user_id) => {
         // Check the number of records before creating
         countMerchantProducts(mp_merchant_user_id)
             .then(response => {
-                console.log(response);
+                // console.log(response);
                 if (response[0].count > 0) {
                     reject(`Initialization with test data aborted (A product already exists for this merchant (ID: ${mp_merchant_user_id}).`);
                 } else {
