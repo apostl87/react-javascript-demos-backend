@@ -3,9 +3,9 @@ const { auth } = require('express-oauth2-jwt-bearer');
 const cors = require('cors');
 require('dotenv');
 
-const ProductModel = require('./Models/ProductModel.js');
 const CountryModel = require('./Models/CountryModel.js');
-const MerchantProductModel = require('./Models/MerchantProductModel.js');
+const ProductModel = require('./Models/ProductModel.js');
+const CategoryModel = require('./Models/CategoryModel.js');
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -44,6 +44,96 @@ app.get('/check-token', jwtCheck, (req, res) => {
 	res.status(200).send("Token is valid");
 })
 
+app.get('/products', jwtCheck, (req, res) => {
+	ProductModel.getAllProducts()
+		.then(response => {
+			res.status(200).send(response);
+		})
+		.catch(error => {
+			res.status(500).send(error);
+		})
+})
+
+app.get('/products/:product_id', jwtCheck, (req, res) => {
+	ProductModel.getProduct(req.params.product_id)
+		.then(response => {
+			res.status(200).send(response);
+		})
+		.catch(error => {
+			res.status(500).send(error);
+		})
+})
+
+app.get('/products/category/:category_id', jwtCheck, (req, res) => {
+	ProductModel.getProductsByCategory(req.params.category_id)
+		.then(response => {
+			res.status(200).send(response);
+		})
+		.catch(error => {
+			res.status(500).send(error);
+		})
+})
+
+app.get('/merchant-products/:merchant_userid', jwtCheck, (req, res) => {
+	ProductModel.getMerchantProducts(req.params.merchant_userid)
+		.then(response => {
+			res.status(200).send(response);
+		})
+		.catch(error => {
+			res.status(500).send(error);
+		})
+})
+
+app.patch('/merchant-products/:merchant_userid/:product_id', jwtCheck, (req, res) => {
+	ProductModel.updateMerchantProduct(req.params.merchant_userid, req.params.product_id, req.body)
+		.then(response => {
+			res.status(200).send(response);
+		})
+		.catch(error => {
+			res.status(500).send(error);
+		})
+})
+
+app.post('/merchant-products/create', jwtCheck, (req, res) => {
+	ProductModel.createMerchantProduct(req.body)
+		.then(response => {
+			res.status(200).send(response);
+		})
+		.catch(error => {
+			res.status(500).send(error);
+		})
+})
+
+app.post('/merchant-products/:merchant_userid/init', jwtCheck, (req, res) => {
+	ProductModel.initWithTestData(req.params.merchant_userid)
+		.then(response => {
+			res.status(200).send(response);
+		})
+		.catch(error => {
+			res.status(500).send(error);
+		})
+})
+
+app.delete('/merchant-products/:merchant_userid/:product_id', jwtCheck, (req, res) => {
+	ProductModel.deleteMerchantProduct(req.params.merchant_userid, req.params.product_id)
+		.then(response => {
+			res.status(200).send(response);
+		})
+		.catch(error => {
+			res.status(500).send(error);
+		})
+})
+
+app.delete('/merchant-products/:merchant_userid', jwtCheck, (req, res) => {
+	ProductModel.deleteAllMerchantProducts(req.params.merchant_userid)
+		.then(response => {
+			res.status(200).send(response);
+		})
+		.catch(error => {
+			res.status(500).send(error);
+		})
+})
+
 app.get('/countries', jwtCheck, (req, res) => {
 	CountryModel.getCountries()
 		.then(response => {
@@ -54,8 +144,8 @@ app.get('/countries', jwtCheck, (req, res) => {
 		})
 })
 
-app.get('/products', jwtCheck, (req, res) => {
-	ProductModel.getProducts()
+app.get('/categories', jwtCheck, (req, res) => {
+	CategoryModel.getCategories()
 		.then(response => {
 			res.status(200).send(response);
 		})
@@ -64,9 +154,8 @@ app.get('/products', jwtCheck, (req, res) => {
 		})
 })
 
-app.patch('/products/:id', jwtCheck, (req, res) => {
-	const id = parseInt(req.params.id);
-	ProductModel.updateProduct(id, req.body)
+app.get('/categories/:category_id/variants', jwtCheck, (req, res) => {
+	CategoryModel.getVariantsByCategory(req.params.category_id)
 		.then(response => {
 			res.status(200).send(response);
 		})
@@ -75,65 +164,6 @@ app.patch('/products/:id', jwtCheck, (req, res) => {
 		})
 })
 
-app.get('/merchant-products/:merchant_userid', jwtCheck, (req, res) => {
-	MerchantProductModel.getMerchantProducts(req.params.merchant_userid)
-		.then(response => {
-			res.status(200).send(response);
-		})
-		.catch(error => {
-			res.status(500).send(error);
-		})
-})
-
-app.patch('/merchant-products/:merchant_userid/:product_id', jwtCheck, (req, res) => {
-	MerchantProductModel.updateMerchantProduct(req.params.merchant_userid, req.params.product_id, req.body)
-		.then(response => {
-			res.status(200).send(response);
-		})
-		.catch(error => {
-			res.status(500).send(error);
-		})
-})
-
-app.post('/merchant-products/create', jwtCheck, (req, res) => {
-	MerchantProductModel.createMerchantProduct(req.body)
-		.then(response => {
-			res.status(200).send(response);
-		})
-		.catch(error => {
-			res.status(500).send(error);
-		})
-})
-
-app.post('/merchant-products/:merchant_userid/init', jwtCheck, (req, res) => {
-	MerchantProductModel.initWithTestData(req.params.merchant_userid)
-		.then(response => {
-			res.status(200).send(response);
-		})
-		.catch(error => {
-			res.status(500).send(error);
-		})
-})
-
-app.delete('/merchant-products/:merchant_userid/:product_id', jwtCheck, (req, res) => {
-	MerchantProductModel.deleteMerchantProduct(req.params.merchant_userid, req.params.product_id)
-		.then(response => {
-			res.status(200).send(response);
-		})
-		.catch(error => {
-			res.status(500).send(error);
-		})
-})
-
-app.delete('/merchant-products/:merchant_userid', jwtCheck, (req, res) => {
-	MerchantProductModel.deleteAllMerchantProducts(req.params.merchant_userid)
-		.then(response => {
-			res.status(200).send(response);
-		})
-		.catch(error => {
-			res.status(500).send(error);
-		})
-})
 
 app.listen(port, () => {
 	console.log(`API running on port ${port}.`)
