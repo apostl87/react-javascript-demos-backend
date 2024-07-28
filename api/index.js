@@ -154,7 +154,20 @@ app.get('/categories', jwtCheck, (req, res) => {
 		})
 })
 
-app.get('/categories/:category_id/variants', jwtCheck, (req, res) => {
+app.get('/categories/variants', jwtCheck, (req, res) => {
+	CategoryModel.getAllVariants()
+		.then(response => {
+			res.status(200).send(response);
+		})
+	// .then(response => {
+	// 	res.status(200).send(response);
+	// })
+	// .catch(error => {
+	// 	res.status(500).send(error);
+	// })
+})
+
+app.get('/categories/variants/:category_id', jwtCheck, (req, res) => {
 	CategoryModel.getVariantsByCategory(req.params.category_id)
 		.then(response => {
 			res.status(200).send(response);
@@ -163,7 +176,6 @@ app.get('/categories/:category_id/variants', jwtCheck, (req, res) => {
 			res.status(500).send(error);
 		})
 })
-
 
 app.listen(port, () => {
 	console.log(`API running on port ${port}.`)

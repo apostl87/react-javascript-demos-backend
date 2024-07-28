@@ -161,7 +161,6 @@ const createMerchantProduct = (body) => {
 };
 
 const initWithTestData = (mp_merchant_user_id) => {
-
     return new Promise(function (resolve, reject) {
         // Check the number of records before creating
         countMerchantProducts(mp_merchant_user_id)
@@ -171,7 +170,7 @@ const initWithTestData = (mp_merchant_user_id) => {
                     reject(`Initialization with test data aborted (A product already exists for this merchant (ID: ${mp_merchant_user_id}).`);
                 } else {
                     // Initialize the merchant's portfolio with test data
-                    let psql = require('../data_templates/init_merchant_products.js');
+                    let psql = require('../data_templates/init_merchant_products_latest.js');
 
                     pool.query(psql,
                         [mp_merchant_user_id],
