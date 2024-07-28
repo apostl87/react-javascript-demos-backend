@@ -4,7 +4,7 @@ const pool = dbinfo.pool;
 
 const getCategories = () => {
     let psql = `
-      SELECT pc_id, pc_name FROM product_categories
+      SELECT pc_id, pc_category_name FROM product_categories
     `
 
     return new Promise(function (resolve, reject) {
