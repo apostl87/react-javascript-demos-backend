@@ -7,7 +7,7 @@ SELECT * FROM merchant_products mp LEFT JOIN countries c ON mp.mp_c_id_productio
 WHERE mp.mp_merchant_user_id = $1 ORDER BY mp.mp_id ASC;
 `;
 
-const getAllProducts = () => {
+const getAllProducts = () => { // to be removed due to potential performance issues
     let psql = `
     SELECT * FROM merchant_products mp
 	LEFT JOIN countries c ON mp.mp_c_id_production = c.c_id 
@@ -17,6 +17,38 @@ const getAllProducts = () => {
 
     return new Promise(function (resolve, reject) {
         pool.query(psql,
+            (error, results) => {
+                if (error) {
+                    reject(error)
+                }
+                resolve(results.rows);
+            })
+    })
+}
+
+const getProducts = (body) => {
+    // Pagination
+    let limit = body.limit ? body.limit : 50;
+    let offset = body.offset ? body.offset : 0;
+
+    // Sorting
+    // ...
+
+    // Filtering
+    // ...
+
+    let psql = `
+    SELECT * FROM merchant_products mp
+	LEFT JOIN countries c ON mp.mp_c_id_production = c.c_id 
+	LEFT JOIN product_categories pc ON mp.mp_pc_id = pc.pc_id
+    ORDER BY mp.mp_pc_id ASC
+    LIMIT $1
+    OFFSET $2;
+    `;
+
+    return new Promise(function (resolve, reject) {
+        pool.query(psql,
+            [limit, offset],
             (error, results) => {
                 if (error) {
                     reject(error)
@@ -229,6 +261,7 @@ const deleteAllMerchantProducts = (mp_merchant_user_id) => {
 
 module.exports = {
     getAllProducts,
+    getProducts,
     getProduct,
     getProductsByCategory,
     getMerchantProducts,

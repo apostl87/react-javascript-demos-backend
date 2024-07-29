@@ -44,8 +44,17 @@ app.get('/check-token', jwtCheck, (req, res) => {
 	res.status(200).send("Token is valid");
 })
 
-app.get('/products', jwtCheck, (req, res) => {
+app.get('/products', jwtCheck, (req, res) => { // TODO: Replace this endpoint by the standard endpoint with pagination, sorting, and filtering (products-new)
 	ProductModel.getAllProducts()
+		.then(response => {
+			res.status(200).send(response);
+		})
+		.catch(error => {
+			res.status(500).send(error);
+		})
+})
+app.get('/products-new', jwtCheck, (req, res) => {
+	ProductModel.getProducts(req.body)
 		.then(response => {
 			res.status(200).send(response);
 		})

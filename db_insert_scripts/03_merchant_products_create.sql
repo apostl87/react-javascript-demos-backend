@@ -20,4 +20,4 @@ CREATE TABLE public.merchant_products (
     FOREIGN KEY(mp_pc_id)
     REFERENCES product_categories(pc_id)
     ON DELETE SET NULL
-);
+)
