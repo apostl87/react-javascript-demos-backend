@@ -28,7 +28,7 @@ const getAllProducts = () => { // to be removed due to potential performance iss
 
 const getProducts = (body) => {
     // Pagination
-    let limit = body.limit ? body.limit : 50;
+    let limit = body.limit ? body.limit : 40;
     let offset = body.offset ? body.offset : 0;
 
     // Sorting
