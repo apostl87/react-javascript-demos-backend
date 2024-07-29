@@ -41,8 +41,7 @@ const getVariantsByCategory = (category_id) => {
 
 const getAllVariants = async () => {
     let categories = await getCategories();
-    //return categories
-    let results = []
+    let results = {}
     for (let category of categories) {
         let variants = await getVariantsByCategory(category.pc_id);
         variants = variants.map(variant => {
@@ -51,12 +50,10 @@ const getAllVariants = async () => {
                 pv_variant_name: variant.pv_variant_name,
             }
         })
-        let result = {
-            pc_id: category.pc_id,
-            pc_category_name: category.pc_category_name,
+        results[category.pc_id] = {
+            category_name: category.pc_category_name,
             variants: variants,
         }
-        results.push(result)
     }
     return results;
 }

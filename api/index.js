@@ -168,12 +168,6 @@ app.get('/categories/variants', jwtCheck, (req, res) => {
 		.then(response => {
 			res.status(200).send(response);
 		})
-	// .then(response => {
-	// 	res.status(200).send(response);
-	// })
-	// .catch(error => {
-	// 	res.status(500).send(error);
-	// })
 })
 
 app.get('/categories/variants/:category_id', jwtCheck, (req, res) => {
