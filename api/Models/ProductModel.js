@@ -26,10 +26,11 @@ const getAllProducts = () => { // to be removed due to potential performance iss
     })
 }
 
-const getProducts = (body) => {
+const getProducts = (query) => {
     // Pagination
-    let limit = body.limit ? body.limit : 40;
-    let offset = body.offset ? body.offset : 0;
+    let { limit, offset } = query;
+    limit = limit ? limit : 40;
+    offset = offset ? offset : 0;
 
     // Sorting
     // ...

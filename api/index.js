@@ -54,7 +54,7 @@ app.get('/products', jwtCheck, (req, res) => { // TODO: Replace this endpoint by
 		})
 })
 app.get('/products-new', jwtCheck, (req, res) => {
-	ProductModel.getProducts(req.body)
+	ProductModel.getProducts(req.query)
 		.then(response => {
 			res.status(200).send(response);
 		})
