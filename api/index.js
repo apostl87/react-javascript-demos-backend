@@ -8,6 +8,7 @@ const ProductModel = require('./Models/ProductModel.js');
 const CategoryModel = require('./Models/CategoryModel.js');
 
 const app = express();
+
 const port = process.env.PORT || 3001;
 
 // JWT Authorization
@@ -17,7 +18,7 @@ const jwtCheck = auth({
 	audience: audience,
 	issuerBaseURL: issuerBaseURL,
 	tokenSigningAlg: 'RS256',
-	authRequired: false, // OF COURSE, THIS SETTING IS ONLY USED IF THE QUOTA IS EXCEEDED.
+	authRequired: true, // OF COURSE, THIS SETTING IS ONLY USED IF THE QUOTA IS EXCEEDED.
 });
 
 // Middleware for parsing incoming requests with JSON payloads
@@ -40,8 +41,8 @@ app.use((req, res, next) => {
 // Enforce authorization on all endpoints
 //app.use(jwtCheck); // This does not work correctly with the used version of express it seems
 
-app.get('/check-token', jwtCheck, (req, res) => {
-	res.status(200).send("Token is valid");
+app.get('/check-connection', jwtCheck, (req, res) => {
+	res.status(200).send("Authentication successful");
 })
 
 app.get('/products', jwtCheck, (req, res) => { // TODO: Replace this endpoint by the standard endpoint with pagination, sorting, and filtering (products-new)
