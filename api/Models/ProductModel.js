@@ -21,7 +21,9 @@ const getAllProducts = () => { // to be removed due to potential performance iss
                 if (error) {
                     reject(error)
                 }
-                resolve(results.rows);
+                if (results) {
+                    resolve(results.rows);
+                }
             })
     })
 }
@@ -39,7 +41,7 @@ const getProducts = (query) => {
     // ...
 
     let psql = `
-    SELECT * FROM merchant_products mp
+    SELECT *, count(*) OVER () AS total_count FROM merchant_products mp
 	LEFT JOIN countries c ON mp.mp_c_id_production = c.c_id 
 	LEFT JOIN product_categories pc ON mp.mp_pc_id = pc.pc_id
     ORDER BY mp.mp_pc_id ASC
@@ -54,7 +56,9 @@ const getProducts = (query) => {
                 if (error) {
                     reject(error)
                 }
-                resolve(results.rows);
+                if (results) {
+                    resolve(results.rows);
+                }
             })
     })
 }
@@ -75,7 +79,9 @@ const getProduct = (product_id) => {
                 if (error) {
                     reject(error)
                 }
-                resolve(results.rows);
+                if (results) {
+                    resolve(results.rows);
+                }
             })
     })
 }
@@ -96,10 +102,43 @@ const getProductsByCategory = (category_id) => {
                 if (error) {
                     reject(error)
                 }
-                resolve(results.rows);
+                if (results) {
+                    resolve(results.rows);
+                }
             })
     })
 }
+
+
+const getBestsellers = (category_id) => {
+    let whereClause = ``
+    let paramsArray = []
+    if (category_id) {
+        whereClause = ` WHERE pc.pc_id = $1`;
+        paramsArray.push(category_id);
+    }
+
+    let psql = `
+    SELECT * FROM merchant_products mp
+	LEFT JOIN countries c ON mp.mp_c_id_production = c.c_id 
+	LEFT JOIN product_categories pc ON mp.mp_pc_id = pc.pc_id`;
+    psql += whereClause;
+    psql += ` ORDER BY RANDOM() LIMIT 4;`; // This of course does not yield bestsellers
+
+    return new Promise(function (resolve, reject) {
+        pool.query(psql,
+            [...paramsArray],
+            (error, results) => {
+                if (error) {
+                    reject(error)
+                }
+                if (results) {
+                    resolve(results.rows);
+                }
+            })
+    })
+}
+
 
 const getMerchantProducts = (mp_merchant_user_id) => {
 
@@ -113,7 +152,9 @@ const getMerchantProducts = (mp_merchant_user_id) => {
                     reject(error)
                 }
                 // console.log(results);
-                resolve(results.rows);
+                if (results) {
+                    resolve(results.rows);
+                }
             })
     })
 
@@ -130,7 +171,9 @@ const countMerchantProducts = (mp_merchant_user_id) => {
                     reject(error)
                 }
                 //console.log(results);
-                resolve(results.rows)
+                if (results) {
+                    resolve(results.rows);
+                }
             }
         );
     });
@@ -154,7 +197,9 @@ const updateMerchantProduct = (mp_merchant_user_id, mp_id, body) => {
                     reject(error);
                 }
                 //console.log(results)
-                resolve(results.rows);
+                if (results) {
+                    resolve(results.rows);
+                }
             }
         );
     });
@@ -183,7 +228,9 @@ const createMerchantProduct = (body) => {
                                 console.log(error);
                                 reject(error);
                             }
-                            resolve(results.rows);
+                            if (results) {
+                                resolve(results.rows);
+                            }
                         });
                 }
             })
@@ -265,6 +312,7 @@ module.exports = {
     getProducts,
     getProduct,
     getProductsByCategory,
+    getBestsellers,
     getMerchantProducts,
     createMerchantProduct,
     updateMerchantProduct,

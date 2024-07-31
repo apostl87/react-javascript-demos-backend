@@ -85,6 +85,26 @@ app.get('/products/category/:category_id', jwtCheck, (req, res) => {
 		})
 })
 
+app.get('/bestsellers', jwtCheck, (req, res) => {
+	ProductModel.getBestsellers()
+		.then(response => {
+			res.status(200).send(response);
+		})
+		.catch(error => {
+			res.status(500).send(error);
+		})
+})
+
+app.get('/bestsellers/category/:category_id/', jwtCheck, (req, res) => {
+	ProductModel.getBestsellers(req.params.category_id)
+		.then(response => {
+			res.status(200).send(response);
+		})
+		.catch(error => {
+			res.status(500).send(error);
+		})
+})
+
 app.get('/merchant-products/:merchant_userid', jwtCheck, (req, res) => {
 	ProductModel.getMerchantProducts(req.params.merchant_userid)
 		.then(response => {
