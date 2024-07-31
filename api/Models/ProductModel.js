@@ -246,8 +246,8 @@ const initWithTestData = (mp_merchant_user_id) => {
         countMerchantProducts(mp_merchant_user_id)
             .then(response => {
                 // console.log(response);
-                if (response[0].count > 0) {
-                    reject(`Initialization with test data aborted (A product already exists for this merchant (ID: ${mp_merchant_user_id}).`);
+                if (response[0].count > 10000) {
+                    reject(`Initialization with test data aborted (10000 products already exists for this merchant (ID: ${mp_merchant_user_id}).`);
                 } else {
                     // Initialize the merchant's portfolio with test data
                     let psql = require('../data_templates/init_merchant_products_latest.js');
