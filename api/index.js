@@ -18,14 +18,14 @@ const jwtCheck = auth({
 	audience: audience,
 	issuerBaseURL: issuerBaseURL,
 	tokenSigningAlg: 'RS256',
-	authRequired: true, // OF COURSE, THIS SETTING IS ONLY USED IF THE QUOTA IS EXCEEDED.
+	authRequired: false, // OF COURSE, THIS SETTING IS ONLY USED IF THE QUOTA IS EXCEEDED.
 });
 
 // Middleware for parsing incoming requests with JSON payloads
 app.use(express.json());
 
 // Middleware for cross-origin requests
-let ALLOWED_ORIGINS = [];
+let ALLOWED_ORIGINS = []
 if (process.env.ALLOWED_ORIGINS) {
 	ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS.split(" ")
 }
@@ -54,6 +54,7 @@ app.get('/products', jwtCheck, (req, res) => { // TODO: Replace this endpoint by
 			res.status(500).send(error);
 		})
 })
+
 app.get('/products-new', jwtCheck, (req, res) => {
 	ProductModel.getProducts(req.query)
 		.then(response => {
