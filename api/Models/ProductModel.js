@@ -69,7 +69,6 @@ const getProduct = (product_id) => {
 	LEFT JOIN countries c ON mp.mp_c_id_production = c.c_id 
 	LEFT JOIN product_categories pc ON mp.mp_pc_id = pc.pc_id
     WHERE mp.mp_id = $1
-    ORDER BY mp.mp_pc_id ASC
     `;
 
     return new Promise(function (resolve, reject) {
@@ -179,30 +178,37 @@ const countMerchantProducts = (mp_merchant_user_id) => {
     });
 }
 
-const updateMerchantProduct = (mp_merchant_user_id, mp_id, body) => {
+const updateMerchantProduct = async (mp_merchant_user_id, mp_id, body) => {
     const { mp_name, mp_color, mp_weight_kg, mp_price, mp_c_id_production, mp_image_url } = body;
 
-    let psql = `UPDATE merchant_products
+    let psql = `UPDATE merchant_products mp
                 SET mp_name = $1, mp_color = $2,mp_weight_kg = $3, mp_price = $4, mp_c_id_production = $5, mp_image_url = $6
-                WHERE mp_merchant_user_id = $7 AND mp_id = $8
-                RETURNING *`;
+                WHERE mp.mp_merchant_user_id = $7 AND mp.mp_id = $8;`;
+
+    await pool.query(psql,
+        [mp_name, mp_color, mp_weight_kg, mp_price, mp_c_id_production, mp_image_url, mp_merchant_user_id, mp_id],
+    )
+
+    psql = `SELECT * FROM merchant_products mp
+	            LEFT JOIN countries c ON mp.mp_c_id_production = c.c_id 
+	            LEFT JOIN product_categories pc ON mp.mp_pc_id = pc.pc_id
+                WHERE mp.mp_merchant_user_id = $1 AND mp.mp_id = $2;`
 
     return new Promise(function (resolve, reject) {
         pool.query(
             psql,
-            [mp_name, mp_color, mp_weight_kg, mp_price, mp_c_id_production, mp_image_url, mp_merchant_user_id, mp_id],
+            [mp_merchant_user_id, mp_id],
             (error, results) => {
                 if (error) {
                     console.log(error);
                     reject(error);
                 }
-                //console.log(results)
                 if (results) {
                     resolve(results.rows);
                 }
             }
         );
-    });
+    })
 };
 
 const createMerchantProduct = (body) => {
